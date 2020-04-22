@@ -1,0 +1,33 @@
+<head>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+</head>
+
+<form>
+    <div class="form-group" id = 'query-form'>
+      <label for="country-query">Country:</label>
+      <input type="text" class="form-control" id="country-query">
+    </div>
+    <div class="checkbox">
+      <label><input type="checkbox"> Remember me</label>
+    </div>
+    <button type="submit" class="btn btn-default">Submit</button>
+</form>
+
+<script> 
+    const form = document.getElementById('query-form')
+    form.addEventListener('submit', e => {
+        e.preventDefault()
+        const country_query = document.getElementById('country-query')
+        fetch(`https://restcountries.eu/rest/v2/name/${country_query}?fullText=true`)
+        .then(res => {
+            return res.json()
+        })
+        .then(object => {
+            console.log(object)
+            alert(object)
+        })
+        .catch( err =>  {
+            console.log(err)
+        })
+    })
+</script>

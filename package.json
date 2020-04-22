@@ -1,0 +1,25 @@
+{
+  "type": "module",
+  "name": "express-docker",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "node ./backend/server.js",
+    "test": "nodemon ./backend/server.js"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "cors": "^2.8.5",
+    "dotenv": "^8.2.0",
+    "express": "^4.17.1",
+    "mongoose": "^5.9.10",
+    "morgan": "^1.10.0",
+    "node-fetch": "^2.6.0"
+  },
+  "devDependencies": {
+    "nodemon": "^2.0.3"
+  }
+}
