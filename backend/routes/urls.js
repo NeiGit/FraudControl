@@ -1,5 +1,5 @@
 const COUNTRY_INFO_URL = (query) => {
-    return `https://restcountries.eu/rest/v2/alpha/${query}?fields=name;capital;currencies;languages;latlng;timezones`
+    return `https://restcountries.eu/rest/v2/alpha/${query}?fields=name;nativeName;capital;currencies;languages;latlng;timezones`
 }
 
 const IP_TRACKING_URL = (query) => {

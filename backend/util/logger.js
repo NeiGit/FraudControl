@@ -4,11 +4,11 @@ function log(header, fileName, msg) {
 }
 
 function info(fileName, msg) {
-    log('INFO', fileName, msg)
+    log('[INFO]', fileName, msg)
 }
 
 function error(fileName, msg, error) {
-    log('ERROR', fileName, msg + ' - ' + error)
+    log('[ERROR]', fileName, msg + ' - ' + error)
 }
 
 

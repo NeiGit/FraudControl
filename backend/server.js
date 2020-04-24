@@ -23,7 +23,7 @@ app.use('/', routes)
 
 app.listen(app.get('port'), () => {
     Logger.info(fileName, "Server listening on port ", app.get('port'))
-    afterStartUp()
+    afterStartUp().then(() => console.log('- server ready -'))
 })
 
 // after start up
@@ -36,10 +36,10 @@ async function afterStartUp() {
         const response = await fetch(Urls.CURRENCY_INFO_URL())
         const jsonData = await response.json()
         Logger.info(fileName, "Succesfully fetched currencies daily info.")
-        DatabaseManager.updateOrCreateCurrenciesInfo(jsonData)
+        await DatabaseManager.updateOrCreateCurrenciesInfo(jsonData)
     } catch (err) {
         Logger.error(fileName, ("An error ocurred while fetching currencies daily info: " + err))
     }
-
-    CurrencyCalculator.convert('ARS', 'USD', 110000)
 }
+
+// CurrencyCalculator.getUSDEquivalence('ARS')

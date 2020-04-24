@@ -3,7 +3,11 @@ import Logger from './logger.js'
 
 const fileName = 'currencyCalculator.js'
 
-
+/** Returns the result of converting given amount of sourceRate currency to the targetRate. Since the context chart (stored in CurrenciesModel) uses EUR as base rate for all currencies, the conversion is performed in two steps. The first one is to obtain the baseAmount, that is the equivalent EUR of sourceAmount, and then the final conversion (targetAmount) is obtained by multiplying targetRate by baseAmount.
+ * @param  {String} sourceRate
+ * @param  {String} targetRate
+ * @param  {Number} sourceAmount
+ */
 function convert(sourceRate, targetRate, sourceAmount) {
     CurrenciesModel.findOne({}, (err, currencies) => {
         try {
@@ -18,12 +22,13 @@ function convert(sourceRate, targetRate, sourceAmount) {
     })
 }
 
-function getUSDEquivalece(sourceRate) {
-   return convert(sourceRate, USD, 1)
+function getUSDEquivalence(targetRate) {
+   Logger.info(fileName, "Requested USD equivalence for " + targetRate)
+   return convert(USD, targetRate, UNIT)
 }
 
 const USD = 'USD'
-const EUR = 'EUR'
+const UNIT = 1
 
 
-export default {convert}
+export default {convert, getUSDEquivalence}
