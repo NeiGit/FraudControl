@@ -1,6 +1,7 @@
 import Logger from './logger.js'
 import CountryDataDTO from '../DTOs/countryDataDTO.js'
 import CurrencyCalculator from './currencyCalculator.js'
+import DistanceCalculator from './distanceCalculator.js'
 
 const fileName = 'responseManager.js'
 
@@ -28,7 +29,8 @@ async function buildCountryDataResponseJson(countryDataModel, ip) {
         currentTimes.push({date : new Date(currentTime), offset: tz})
     })
     dto.setCurrentTimes(currentTimes)
-    dto.setDistanceInfo(countryDataModel.coordinates, bsAsLtdLng)
+    const distanceToBsAs = DistanceCalculator.calculateDistanceBetweenCoordinates(countryDataModel.coordinates.latitude, countryDataModel.coordinates.longitude, bsAsLtdLng.latitude, bsAsLtdLng.longitude)
+    dto.setDistanceInfo(countryDataModel.coordinates, bsAsLtdLng, distanceToBsAs.toFixed(0))
 
     return formatResponse(dto)
     // calculate current currency

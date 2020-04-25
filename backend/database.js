@@ -18,4 +18,8 @@ async function init() {
     }
 }
 
-export default {init}
+function checkStatus() {
+    return mongoose.connection.readyState
+} 
+
+export default {init, checkStatus}
