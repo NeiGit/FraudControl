@@ -21,4 +21,21 @@ function calculateDistanceBetweenCoordinates(ltd1, lng1, ltd2, lng2) {
     return EARTH_RADIUS * c;
 }
 
-export default {calculateDistanceBetweenCoordinates}
+function getDistanceToBsAs(latitude, longitude, roundFactor) {
+  return calculateDistanceBetweenCoordinates(ARG_COORDINATES.latitude, ARG_COORDINATES.longitude, latitude, longitude).toFixed(roundFactor)
+}
+
+const ARG_COORDINATES = {
+  latitude: -34,
+  longitude: -64
+}
+
+function getDistanceMetric(countryDataStatRecord) {
+  return countryDataStatRecord.coordinates.distanceToBsAs * countryDataStatRecord.requestCount
+}
+
+function calculateAverageDistance(distance, count, roundFactor) {
+  return (distance / count).toFixed(roundFactor)
+}
+
+export default {calculateDistanceBetweenCoordinates, getDistanceToBsAs, getDistanceMetric, calculateAverageDistance}

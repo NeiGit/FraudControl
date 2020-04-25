@@ -2,6 +2,7 @@ import Logger from './logger.js'
 import CountryDataDTO from '../DTOs/countryDataDTO.js'
 import CurrencyCalculator from './currencyCalculator.js'
 import DistanceCalculator from './distanceCalculator.js'
+import CountryDataStatsDTO from '../DTOs/countryDataStatsDTO.js'
 
 const fileName = 'responseManager.js'
 
@@ -55,4 +56,25 @@ function currentUTC () {
     return new Date(new Date().setHours(new Date().getHours() + 3)).getHours()
 }
 
-export default {buildCountryDataResponseJson}
+function buildCountryDataStatsResponseJson (countryDataStatRecords) {
+    const countryDataStatsDto = CountryDataStatsDTO.create()
+    
+    let distanceAccumulator = 0
+    let requestAccumulator = 0
+
+    countryDataStatRecords.forEach(cdsr => {
+        const distanceMetric = DistanceCalculator.getDistanceMetric(cdsr)
+        distanceAccumulator += distanceMetric
+        requestAccumulator += cdsr.requestCount
+
+        countryDataStatsDto.addCountryDataStat(cdsr)
+    })
+
+    const averageDistance = DistanceCalculator.calculateAverageDistance(distanceAccumulator, requestAccumulator, 0)
+    countryDataStatsDto.setAverageDistance(averageDistance)
+
+    return formatResponse(countryDataStatsDto)
+}
+
+
+export default {buildCountryDataResponseJson, buildCountryDataStatsResponseJson}

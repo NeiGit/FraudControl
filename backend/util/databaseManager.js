@@ -3,6 +3,8 @@ import CurrenciesModel from '../models/currencies.model.js'
 import CountryDataModel from '../models/countryData.model.js'
 import Err from './errorManager.js'
 import Database from '../database.js'
+import DistanceCalculator from './distanceCalculator.js'
+import CountryDataStatDTO from '../DTOs/countryDataStatsDTO.js'
 
 
 
@@ -62,7 +64,8 @@ async function createCountryDataModel(countryDataJson) {
         })
         countryDataModel.coordinates = {
            latitude: countryDataJson.latlng[0],
-           longitude: countryDataJson.latlng[1] 
+           longitude: countryDataJson.latlng[1],
+           distanceToBsAs: DistanceCalculator.getDistanceToBsAs(countryDataJson.latlng[0], countryDataJson.latlng[1], 0)
         }
         countryDataModel.save()
         Logger.info(fileName, `Created CountryData model for '${countryDataJson.name}'`)
@@ -91,6 +94,17 @@ function isDatabaseConnected() {
     return Database.checkStatus() === 1
 }
 
+function getAllCountryDataStatRecords() {
+    if(isDatabaseConnected()) 
+        return CountryDataModel.find({}, ('name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
+            if(err)
+                return undefined
+            else {
+                return result
+            }
+        })
+    else return undefined    
+}
 
 export default {
     initDatabase,
@@ -98,5 +112,6 @@ export default {
     createCountryDataModel, 
     incrementCountryDataModelCounter, 
     findPersistedCountryDataModel,
-    isDatabaseConnected
+    isDatabaseConnected,
+    getAllCountryDataStatRecords
 }
