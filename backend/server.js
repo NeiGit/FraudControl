@@ -21,16 +21,27 @@ app.listen()
 app.use(morgan('dev'))
 app.use('/', routes)
 
-app.listen(app.get('port'), () => {
+// express error handling
+
+app.use((err, req, res, next) => {
+    res.status(err.status || 500)
+    res.json({
+        error: {
+            status: err.status,
+            message: err.message
+        }
+    })
+})
+
+app.listen(app.get('port'), async () => {
     Logger.info(fileName, "Server listening on port ", app.get('port'))
-    afterStartUp().then(() => console.log('- server ready -'))
+    await afterStartUp()
+    console.log('- server is ready -')
 })
 
 // after start up
 async function afterStartUp() {
-
     await Database.init()
-
     Logger.info(fileName, "Fetching currencies daily info")
     try {
         const response = await fetch(Urls.CURRENCY_INFO_URL())

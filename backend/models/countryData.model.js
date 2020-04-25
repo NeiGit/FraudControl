@@ -12,14 +12,12 @@ const countryDataSchema = new Schema({
         nativeName: String,
         iso639_1: String
     }],
-    currency: {
-        rate: String,
-        symbole: String,
-    },
+    currency: String,
     timezones: [],
     coordinates: {
         latitude: Number,
-        longitude: Number
+        longitude: Number,
+        distanceToBsAs: Number,
     },
     requestCount: {type: Number, default : 1}
 })

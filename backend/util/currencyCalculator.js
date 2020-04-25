@@ -8,27 +8,28 @@ const fileName = 'currencyCalculator.js'
  * @param  {String} targetRate
  * @param  {Number} sourceAmount
  */
-function convert(sourceRate, targetRate, sourceAmount) {
-    CurrenciesModel.findOne({}, (err, currencies) => {
-        try {
-            const rates = JSON.parse(currencies.json).rates
-            Logger.info(fileName, `About to convert ${sourceAmount} ${sourceRate} to ${targetRate}`)
-            const baseAmount = sourceAmount / rates[sourceRate]
-            const targetAmount = baseAmount * rates[targetRate]
-            Logger.info(fileName, `${sourceAmount} ${sourceRate} are equivalent to ${targetAmount} ${targetRate}`)
-        } catch (err) {
-            Logger.info(fileName, 'Failed to convert', err)
-        }
-    })
+async function convert(sourceRate, targetRate, sourceAmount) {
+    try {
+        const currencies = await CurrenciesModel.findOne()
+        const rates = JSON.parse(currencies.json).rates
+        Logger.info(fileName, `About to convert ${sourceAmount} ${sourceRate} to ${targetRate}`)
+        const baseAmount = sourceAmount / rates[sourceRate]
+        const targetAmount = baseAmount * rates[targetRate]
+        Logger.info(fileName, `${sourceAmount} ${sourceRate} are equivalent to ${targetAmount} ${targetRate}`)
+        return targetAmount
+    } catch (err) {
+        Logger.info(fileName, 'Failed to convert', err)
+    }
 }
 
-function getUSDEquivalence(targetRate) {
-   Logger.info(fileName, "Requested USD equivalence for " + targetRate)
-   return convert(USD, targetRate, UNIT)
+async function getUSDEquivalence(sourceRate) {
+    Logger.info(fileName, "Requested USD equivalence for " + sourceRate)
+    return await convert(sourceRate, USD, UNIT)
 }
 
 const USD = 'USD'
 const UNIT = 1
+
 
 
 export default {convert, getUSDEquivalence}

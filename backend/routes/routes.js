@@ -5,6 +5,8 @@ import RequestValidator from '../util/requestValidator.js'
 import Urls from './urls.js'
 import DatabaseManager from '../util/databaseManager.js'
 import Logger from '../util/logger.js'
+import FetchManager from '../util/fetchManager.js'
+import ResponseManager from '../util/responseManager.js'
 
 const router = express.Router()
 const fileName = 'routes.js'
@@ -38,27 +40,59 @@ router.route('/country/:code')
         })
     })
 
-router.get('/traceip/:ip', async (req, res) => {
+/* router.get('/traceip/:ip', async (req, res) => {
     try {
-        Logger.info((fileName, `Fetching ip data for ${req.params.ip}`))
+        Logger.info(fileName, `Fetching ip data for ${req.params.ip}`)
         const ipDataFetch = await fetch(Urls.IP_TRACKING_URL(req.params.ip))
         const ipDataJson = await ipDataFetch.json()
-        Logger.info((fileName, `Successfully fetched ip data for ${req.params.ip}`))
+        Logger.info(fileName, `Successfully fetched ip data for ${req.params.ip}`)
 
-        DatabaseManager.createOrUpdateCountryData(ipDataJson.countryCode3)
-
-        /* Logger.info((fileName, `Fetching country data for ${ipDataJson.countryCode3}`))
-        const countryDataFetch = await fetch(Urls.COUNTRY_INFO_URL(ipDataJson.countryCode3))
-        const countryDataJson = await countryDataFetch.json()
-        Logger.info((fileName, `Succesfully fetched country data for ${ipDataJson.countryCode3}`))
-
-        DatabaseManager.createCountryData(countryDataJson) */
+        await DatabaseManager.createOrUpdateCountryData(ipDataJson.countryCode3)
 
         res.status(200).send("OK")
     } catch (err) {
         res.send(err)
     }    
+}) */
+
+/* router.get('/traceip/:ip', (req, res, next) => {
+    const ip = req.params.ip
+    FetchManager.fetchIpData(ip)
+    .then(ipDataJson => {
+        const countryCode3 = ipDataJson.countryCode3
+        FetchManager.fetchCountryData(countryCode3)
+        .then(countryDataJson => res.json(countryDataJson))
+        .catch(err => next(err))
+    })
+    .catch(err => next(err))    
+}) */
+
+router.get('/traceip/:ip', async (req, res, next) => {
+    try {
+        const ip = req.params.ip
+        const ipDataJson = await FetchManager.fetchIpData(ip)
+
+        const countryCode3 = ipDataJson.countryCode3
+        const persistedCountryDataModel = await DatabaseManager.findPersistedCountryDataModel(countryCode3)
+        if (persistedCountryDataModel) {
+            const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(persistedCountryDataModel, ip)
+            res.json(countryDataResponseJson)
+            DatabaseManager.incrementCountryDataModelCounter(persistedCountryDataModel)
+        } else {
+            const countryDataJson = await FetchManager.fetchCountryData(countryCode3)
+            countryDataJson.countryCode3 = countryCode3
+            // en este punto hay que ver si proceder a devolver la respuesta en paralalelo a la persistencia
+            const newCountryDataModel = await DatabaseManager.createCountryDataModel(countryDataJson)
+
+            const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(newCountryDataModel, ip)
+            res.json(countryDataResponseJson)
+        }   
+
+    } catch (err) {
+        next(err) 
+    }
 })
+
 
 
 
