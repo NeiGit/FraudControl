@@ -1,16 +1,20 @@
-function log(header, fileName, msg) {
-    const date = new Date()
-    console.log(`${header} - ${date.getMinutes()}:${date.getSeconds()}:${date.getMilliseconds()} - ${fileName} - ${msg}`)
+export class Logger {
+    constructor(fileName) {
+        this.fileName = fileName
+    }
+
+    log(header, msg) {
+        const date = new Date()
+        console.log(`${header} - ${date.getMinutes()}:${date.getSeconds()}:${date.getMilliseconds()} - ${this.fileName} - ${msg}`)
+    }
+    
+    info(msg) {
+        this.log('[INFO]', msg)
+    }
+    
+    error(msg, error) {
+        this.log('[ERROR]', msg + ' - ' + error)
+    }
 }
 
-function info(fileName, msg) {
-    log('[INFO]', fileName, msg)
-}
 
-function error(fileName, msg, error) {
-    log('[ERROR]', fileName, msg + ' - ' + error)
-}
-
-
-
-export default { log, error, info }

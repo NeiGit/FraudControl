@@ -1,15 +1,16 @@
-import Logger from './logger.js'
-import CountryDataDTO from '../DTOs/countryDataDTO.js'
+import {Logger} from './logger.js'
+import {CountryDataDTO} from '../DTOs/countryDataDTO.js'
 import CurrencyCalculator from './currencyCalculator.js'
 import DistanceCalculator, {ARG_COORDINATES} from './distanceCalculator.js'
-import CountryDataStatsDTO from '../DTOs/countryDataStatsDTO.js'
+import {CountryDataStatsDTO} from '../DTOs/countryDataStatsDTO.js'
+import TimeCalculator from './timeCalculator.js'
 
-const fileName = 'responseManager.js'
+const logger = new Logger('responseManager.js')
 
 async function buildCountryDataResponseJson(countryDataModel, ip) {
-    Logger.info(fileName, 'Building CountryData json response')
+    logger.info( 'Building CountryData json response dto from model')
 
-    const dto = CountryDataDTO.create()
+    const dto = new CountryDataDTO()
     dto.setIp(ip)
 
     const currentUtcDate = new Date()
@@ -26,7 +27,7 @@ async function buildCountryDataResponseJson(countryDataModel, ip) {
 
     countryDataModel.timezones.forEach(tz => {
         const hourDifference = getHourDifference(tz)
-        const currentTime = new Date().setHours(currentUTC() + hourDifference)
+        const currentTime = new Date().setHours(TimeCalculator.getCurrentUTCHours() + hourDifference)
         currentTimes.push({date : new Date(currentTime), offset: tz})
     })
     dto.setCurrentTimes(currentTimes)
@@ -34,6 +35,7 @@ async function buildCountryDataResponseJson(countryDataModel, ip) {
 
     return formatResponse(dto)
 }
+
 
 function getHourDifference(timezone) {
     const hourDifference = parseFloat(timezone.substring(3))
@@ -44,18 +46,9 @@ function formatResponse(dto) {
     return Object.keys(dto).map(function (key) { return dto[key]; })
 }
 
-const currentUTCDate = (date) => {
-    const utcMiliseconds = date.getTime()
-    return new Date(utcMiliseconds)
-}
-
-function currentUTC () {
-    return new Date(new Date().setHours(new Date().getHours() + 3)).getHours()
-}
-
 function buildCountryDataStatsResponseJson (countryDataStatRecords) {
-    Logger.info(fileName, 'Building CountryDataStats json response')
-    const dto = CountryDataStatsDTO.create()
+    logger.info( 'Building CountryDataStats json response')
+    const dto = new CountryDataStatsDTO()
     
     let distanceAccumulator = 0
     let requestAccumulator = 0

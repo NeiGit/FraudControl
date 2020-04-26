@@ -1,4 +1,4 @@
-import Logger from './logger.js'
+import {Logger} from './logger.js'
 import CurrenciesModel from '../models/currencies.model.js'
 import CountryDataModel from '../models/countryData.model.js'
 import Err from './errorManager.js'
@@ -8,10 +8,10 @@ import DistanceCalculator from './distanceCalculator.js'
 
 
 
-const fileName = 'databaseManager.js'
+const logger =  new Logger('databaseManager.js')
 
 async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
-    Logger.info(fileName, "Persisting currencies info model")
+    logger.info("Persisting currencies info model")
     try {
         await CurrenciesModel.findOne((err, persisted) => {
             const currenciesInfoModel = persisted ? persisted : new CurrenciesModel()
@@ -19,10 +19,10 @@ async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
                 currenciesInfoModel.date = currenciesInfoJson.date
                 currenciesInfoModel.rates = currenciesInfoJson.rates
                 currenciesInfoModel.save()
-                Logger.info(fileName, "Succesfully persisted info model")
+                logger.info("Succesfully persisted info model")
         })       
     } catch (err) {
-        Logger.error(fileName, "failed to persist currencies info model - ", err)
+        logger.error( "failed to persist currencies info model - ", err)
     }
 }
 
@@ -30,11 +30,11 @@ async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
 function incrementCountryDataModelCounter(persistedCountryDataModel) {
     persistedCountryDataModel.requestCount ++
     persistedCountryDataModel.save()
-    Logger.info(fileName, `Updated CountryData model for '${persistedCountryDataModel.name.name}'. With this request its counter reached ${persistedCountryDataModel.requestCount} hits`)
+    logger.info(`Updated CountryData model for '${persistedCountryDataModel.name.name}'. With this request its counter reached ${persistedCountryDataModel.requestCount} hits`)
 }
 
 async function createCountryDataModel(countryDataJson) {
-    Logger.info(fileName, `Creating CountryData model for ${countryDataJson.name}`)
+    logger.info(`Creating CountryData model for ${countryDataJson.name}`)
     try {
         if(!isDatabaseConnected()) throw new Error('Database is not connected')
         const countryDataModel = new CountryDataModel()
@@ -63,11 +63,12 @@ async function createCountryDataModel(countryDataJson) {
            longitude: countryDataJson.latlng[1],
            distanceToBsAs: DistanceCalculator.getDistanceToBsAs(countryDataJson.latlng[0], countryDataJson.latlng[1], 0)
         }
+        // 
         countryDataModel.save()
-        Logger.info(fileName, `Created CountryData model for '${countryDataJson.name}'`)
+        logger.info(`Created CountryData model for '${countryDataJson.name}'`)
         return countryDataModel
     } catch(err) {
-        Logger.error(fileName, "Failed when trying to create new CountryData model", err)
+        logger.error( "Failed when trying to create new CountryData model", err)
         throw Err(500, `Failed when trying to create new CountryData model. ${err}` )
     }
 }

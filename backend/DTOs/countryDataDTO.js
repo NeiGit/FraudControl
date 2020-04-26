@@ -1,4 +1,4 @@
-class CountryDataDTO {
+export class CountryDataDTO {
     setIp(ip){this.ip = `IP: ${ip}`}
     setRequestDate(requestDate){this.requestDate = `Fecha actual: ${requestDate}`}
     setNameInfo(nativeName, name){this.name = `País: ${nativeName} (${name})`}
@@ -14,12 +14,4 @@ class CountryDataDTO {
         currentTimes.forEach(ct => this.currentTimes += ` ${ct.date.getHours()}:${ct.date.getMinutes()}:${ct.date.getSeconds()} (${ct.offset})`)
     }
     setDistanceInfo(coordinates, argCoordinates){this.distanceInfo = `Distancia estimada: ${coordinates.distanceToBsAs} kms, (${argCoordinates.latitude}, ${argCoordinates.longitude}) a (${coordinates.latitude}, ${coordinates.longitude})`}
-}
-
-function create() {
-    return new CountryDataDTO()
-}
-
-export default { 
-    create
 }

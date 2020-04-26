@@ -1,11 +1,9 @@
 import express from 'express'
 import DatabaseManager from '../util/databaseManager.js'
-import Logger from '../util/logger.js'
 import FetchManager from '../util/fetchManager.js'
 import ResponseManager from '../util/responseManager.js'
 
 const router = express.Router()
-const fileName = 'routes.js'
 
 router.get('/', (req, res) => {
     res.send("Welcome to Fraud Control. Trace an ip by requesting /traceip/AN_IP")
@@ -25,7 +23,6 @@ router.get('/traceip/:ip', async (req, res, next) => {
         } else {
             const countryDataJson = await FetchManager.fetchCountryData(countryCode3)
             countryDataJson.countryCode3 = countryCode3
-            // en este punto hay que ver si proceder a devolver la respuesta en paralalelo a la persistencia
 
             const newCountryDataModel = await DatabaseManager.createCountryDataModel(countryDataJson)
 

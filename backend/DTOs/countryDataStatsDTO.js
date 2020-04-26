@@ -1,4 +1,4 @@
-class CountryDataStatsDTO {
+export class CountryDataStatsDTO {
     constructor() {
         this.countryDataStats = []
     }
@@ -10,11 +10,3 @@ class CountryDataStatsDTO {
     setFarestRequestInfo(country, distance) {this.farestRequestInfo = `Invocación más lejana: ${country} ${distance} kms`}
     setNearestRequestInfo(country, distance) {this.nearestRequestInfo = `Invocación más cercana: ${country} ${distance} kms`}
 }    
-
-function create() {
-    return new CountryDataStatsDTO()
-}
-
-export default { 
-    create
-}
