@@ -25,7 +25,7 @@ function getDistanceToBsAs(latitude, longitude, roundFactor) {
   return calculateDistanceBetweenCoordinates(ARG_COORDINATES.latitude, ARG_COORDINATES.longitude, latitude, longitude).toFixed(roundFactor)
 }
 
-const ARG_COORDINATES = {
+export const ARG_COORDINATES = {
   latitude: -34,
   longitude: -64
 }

@@ -11,11 +11,11 @@ const fileName = 'currencyCalculator.js'
 async function convert(sourceRate, targetRate, sourceAmount) {
     try {
         const currencies = await CurrenciesModel.findOne()
-        const rates = JSON.parse(currencies.json).rates
+        const {rates} = currencies
         Logger.info(fileName, `About to convert ${sourceAmount} ${sourceRate} to ${targetRate}`)
         const baseAmount = sourceAmount / rates[sourceRate]
         const targetAmount = baseAmount * rates[targetRate]
-        Logger.info(fileName, `${sourceAmount} ${sourceRate} are equivalent to ${targetAmount} ${targetRate}`)
+        Logger.info(fileName, `${sourceAmount} ${sourceRate} are equivalent to ${targetAmount.toFixed(3)} ${targetRate}`)
         return targetAmount
     } catch (err) {
         Logger.info(fileName, 'Failed to convert', err)

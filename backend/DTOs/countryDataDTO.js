@@ -13,7 +13,7 @@ class CountryDataDTO {
         this.currentTimes = "Hora:"
         currentTimes.forEach(ct => this.currentTimes += ` ${ct.date.getHours()}:${ct.date.getMinutes()}:${ct.date.getSeconds()} (${ct.offset})`)
     }
-    setDistanceInfo(coordinates, bsAsLtdLng, distanceToBsAs){this.distanceInfo = `Distancia estimada: ${distanceToBsAs} kms, (${bsAsLtdLng.latitude}, ${bsAsLtdLng.longitude}) a (${coordinates.latitude}, ${coordinates.longitude})`}
+    setDistanceInfo(coordinates, argCoordinates){this.distanceInfo = `Distancia estimada: ${coordinates.distanceToBsAs} kms, (${argCoordinates.latitude}, ${argCoordinates.longitude}) a (${coordinates.latitude}, ${coordinates.longitude})`}
 }
 
 function create() {

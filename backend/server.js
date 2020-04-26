@@ -1,6 +1,7 @@
 import express from 'express'
 import morgan from 'morgan'
 import routes from './routes/routes.js'
+import cors from 'cors'
 import Database from './database.js'
 import DatabaseManager from './util/databaseManager.js'
 import Logger from './util/logger.js'
@@ -14,7 +15,8 @@ const fileName = "server.js"
 
 // config
 app.set('port', process.env.PORT || 3000)
-app.listen()
+app.use(cors())
+
 
 // currencies refresh rate
 const CURRENCIES_INFO_REFETCH_INTERVAL = 2
@@ -38,14 +40,16 @@ app.use((err, req, res, next) => {
     })
 })
 
-app.listen(app.get('port'), async () => {
+app.listen(app.get('port'), () => {
     Logger.info(fileName, "Server listening on port ", app.get('port'))
-    await afterStartup()
+    afterStartup().then(() => {
+    
+    console.log('- server is ready -')
+    }).catch(err => Logger.error(500, 'An error ocurred after the server started', err))
     if(!DatabaseManager.isDatabaseConnected()) {
         databaseRetryProcess = setInterval(afterStartup, TimeCalculator.seconds(DATABASE_RETRY_INTERVAL))
         Logger.info(fileName, `Database connection retry every ${DATABASE_RETRY_INTERVAL} seconds`)
     }
-    console.log('- server is ready -')
 })
 
 async function refreshCurrenciesInfo() {
@@ -53,7 +57,7 @@ async function refreshCurrenciesInfo() {
         const currenciestInfoJson = await FetchManager.fetchCurrenciesInfo()
         await DatabaseManager.updateOrCreateCurrenciesInfo(currenciestInfoJson)
     } catch (err) {
-        Logger.error(fileName, ("An error ocurred while fetching currencies daily info: " + err))
+        Logger.error(fileName, "An error ocurred while fetching currencies daily info: ", err)
     }
 }
 

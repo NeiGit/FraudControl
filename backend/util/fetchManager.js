@@ -8,9 +8,19 @@ const fileName = 'fetchManager.js'
 
 async function  fetchCurrenciesInfo() {
     Logger.info(fileName, `Fetching currencies info`)
-    const response = await fetch(Urls.CURRENCY_INFO_URL())
-    Logger.info(fileName, "Succesfully fetched currencies daily info.")
-    return response.json()
+    const r = await fetch(Urls.CURRENCY_INFO_URL())
+    if (r.status === 200) {
+        Logger.info(fileName, "Succesfully fetched currencies daily info.")
+        const currenciesInfoJson = await r.json()
+        if (currenciesInfoJson.success)
+            return currenciesInfoJson
+        else 
+            throw Error(400, 'Invalid currencies info json')
+
+    } else {
+        Logger.error(fileName, 'Bad currencies request')
+        throw Error(r.status, 'Bad currencies request')
+    }
 }
 
 async function fetchCountryData(countryCode3) {
@@ -34,7 +44,7 @@ async function fetchIpData(ip) {
         return r.json()
     }
     else {
-        Logger.error(fileName, `Failed while fetching ip data for ${ip}`, error)
+        Logger.error(fileName, `Failed while fetching ip data for ${ip}`)
         throw Error(r.status, 'Bad ip request')
     }
 }

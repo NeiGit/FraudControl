@@ -40,8 +40,12 @@ router.get('/traceip/:ip', async (req, res, next) => {
 
 router.get('/statistics' , async (req, res, next) => {
     const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
-    const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
-    res.status(200).json(countryDataStatsResponseJson)
+    if(countryDataStatRecords.length) {
+        const countryDataStatsResponseJson = ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
+        res.status(200).json(countryDataStatsResponseJson)
+    } else {
+        res.status(200).send("No hay peticiones registradas hasta el momento")
+    }    
 })
 
 

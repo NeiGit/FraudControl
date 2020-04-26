@@ -4,29 +4,25 @@ import CountryDataModel from '../models/countryData.model.js'
 import Err from './errorManager.js'
 import Database from '../database.js'
 import DistanceCalculator from './distanceCalculator.js'
-import CountryDataStatDTO from '../DTOs/countryDataStatsDTO.js'
+
 
 
 
 const fileName = 'databaseManager.js'
 
 async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
-    Logger.info(fileName, "Updating or creating currencies info database registry")
+    Logger.info(fileName, "Persisting currencies info model")
     try {
         await CurrenciesModel.findOne((err, persisted) => {
-            if (persisted) {
-                persisted.json = JSON.stringify(currenciesInfoJson)
-                persisted.save()
-                Logger.info(fileName, "Currencies info succesfully updated")
-            }
-            else {
-                const currenciesInfo = new CurrenciesModel(currenciesInfoJson)
-                currenciesInfo.save()
-                Logger.info(fileName, "Currencies info succesfully created")
-            }
+            const currenciesInfoModel = persisted ? persisted : new CurrenciesModel()
+                currenciesInfoModel.base = currenciesInfoJson.base
+                currenciesInfoModel.date = currenciesInfoJson.date
+                currenciesInfoModel.rates = currenciesInfoJson.rates
+                currenciesInfoModel.save()
+                Logger.info(fileName, "Succesfully persisted info model")
         })       
     } catch (err) {
-        Logger.error(fileName, "failed to update or create currencies info - " + err)
+        Logger.error(fileName, "failed to persist currencies info model - ", err)
     }
 }
 
