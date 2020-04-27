@@ -44,7 +44,7 @@
     <hr/>
 
     <div id="countryDataStats" class = "stats">
-        <button type = "button" class = "btn btn-warning" v-on:click="loadStatistics">Cargar estadísticas </button>
+        <button type = "button" class = "btn btn-warning" v-on:click="loadStatistics"> {{btnText}} </button>
         <button type = "button" class = "btn btn-danger" style="margin-left: 20px;"v-on:click="hideTable" v-if='displayTable'>Ocultar</button>
         <div class="alert alert-warning alert-dismissible fade show" v-if="message.display">
             {{message.text}}
@@ -140,6 +140,7 @@
         el: '#countryDataStats',
         data: {
             displayTable: false,
+            btnText: "Cargar estadísticas",
             message: {
                 display:false,
                 text:''
@@ -152,6 +153,7 @@
         },
         methods:{
             loadStatistics: async function() {
+                this.displayTable = false
                 const response = await fetch(`http://localhost:3000/statistics`)
                 if (response.status === 200) {
                     const countryStatsJson = await response.json()
@@ -162,11 +164,18 @@
                     this.message.text = message
                 }
                 
-                const emptyTable = this.stats.length === 0
-                this.displayTable = !emptyTable
+                if (this.stats.length > 0) {
+                    this.showTable()
+                    this.btnText = 'Refrescar'
+                } 
+            }
+            ,
+            showTable: function() {
+                this.displayTable = true
             },
             hideTable: function(){
                 this.displayTable = false
+                this.btnText = 'Cargar estadísticas'
             },
             populateTable: function(countryStatsDTOJson) {
                 const {stats, farestRequestInfo, nearestRequestInfo, averageDistance} = countryStatsDTOJson

@@ -22,14 +22,15 @@ router.get('/traceip/:ip', async (req, res, next) => {
         const countryCode3 = ipDataJson.countryCode3
         const persistedCountryDataModel = await DatabaseManager.findPersistedCountryDataModel(countryCode3)
         if (persistedCountryDataModel) {
+            DatabaseManager.incrementCounter(persistedCountryDataModel.ISOcode)
             const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(persistedCountryDataModel, ip)
             res.json(countryDataResponseJson)
-            DatabaseManager.incrementCountryDataModelCounter(persistedCountryDataModel)
         } else {
             const countryDataJson = await FetchManager.fetchCountryData(countryCode3)
             countryDataJson.countryCode3 = countryCode3
 
             const newCountryDataModel = await DatabaseManager.createCountryDataModel(countryDataJson)
+            DatabaseManager.incrementCountryDataModelCounter(newCountryDataModel.ISOcode)
 
             const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(newCountryDataModel, ip)
             res.json(countryDataResponseJson)
@@ -42,13 +43,13 @@ router.get('/traceip/:ip', async (req, res, next) => {
 
 router.get('/statistics' , async (req, res, next) => {
     try{
-    const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
-    if(countryDataStatRecords) {
-        const countryDataStatsResponseJson = ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
-        res.status(200).json(countryDataStatsResponseJson)
-    } else {
-        next()
-    }
+        const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
+        if(countryDataStatRecords) {
+            const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
+            res.status(200).json(countryDataStatsResponseJson)
+        } else {
+            next()
+        }
     } catch(err) {
         next(err) 
     }    

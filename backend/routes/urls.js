@@ -6,7 +6,7 @@ const IP_TRACKING_URL = (query) => {
     return `https://api.ip2country.info/ip?${query}`
 }
 
-const CURRENCY_INFO_URL = () => `http://data.fixer.io/api/latest?access_key=f27ac9b730f160bdcfe11acbfaeaae9a`
+const CURRENCY_INFO_URL = () => `http://data.fixer.io/api/latest?access_key=4505deab3de167c7928d0626eaffca17`
 
 
 export default {

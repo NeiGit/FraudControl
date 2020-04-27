@@ -1,9 +1,11 @@
 import mongoose from 'mongoose'
+import UpdateIfCurrentPlugin from 'mongoose-update-if-current';
+import timestamps from 'mongoose-timestamp'
 
 const Schema = mongoose.Schema
 
 const countryDataSchema = new Schema({
-    ISOcode : String,
+    ISOcode :{type: String, unique: true},
     name : {
         name: String,
         native: String
@@ -18,8 +20,10 @@ const countryDataSchema = new Schema({
         latitude: Number,
         longitude: Number,
         distanceToBsAs: Number,
-    },
-    requestCount: {type: Number, default : 1}
+    }
+}, {timestamps: {createdAt: 'created', updatedAt: 'updated'}
 })
+
+countryDataSchema.plugin(UpdateIfCurrentPlugin.updateIfCurrentPlugin, { strategy: 'timestamp' })
 
 export default mongoose.model('CountryData', countryDataSchema, 'CountryData')

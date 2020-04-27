@@ -61,9 +61,9 @@ async function afterStartup() {
     await DatabaseManager.initDatabase()
     if (DatabaseManager.isDatabaseConnected()) {
         clearInterval(databaseRetryProcess)
-        await refreshCurrenciesInfo()
-        logger.info(`Currencies info will be refetched every ${CURRENCIES_INFO_REFETCH_INTERVAL} minutes`)
-        setInterval(refreshCurrenciesInfo, TimeCalculator.minutes(CURRENCIES_INFO_REFETCH_INTERVAL));
+       // await refreshCurrenciesInfo()
+        /* logger.info(`Currencies info will be refetched every ${CURRENCIES_INFO_REFETCH_INTERVAL} minutes`)
+        setInterval(refreshCurrenciesInfo, TimeCalculator.minutes(CURRENCIES_INFO_REFETCH_INTERVAL)); */
     }
 }
 

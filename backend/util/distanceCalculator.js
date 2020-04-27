@@ -30,8 +30,8 @@ export const ARG_COORDINATES = {
   longitude: -64
 }
 
-function getDistanceMetric(countryDataStatRecord) {
-  return countryDataStatRecord.coordinates.distanceToBsAs * countryDataStatRecord.requestCount
+function getDistanceMetric(countryDataStatRecord, requestCount) {
+  return countryDataStatRecord.coordinates.distanceToBsAs * requestCount
 }
 
 function calculateAverageDistance(distance, count, roundFactor) {

@@ -2,11 +2,11 @@ export class CountryDataStatsDTO {
     constructor() {
         this.stats = []
     }
-    addCountryDataStat(countryDataStat) {
+    addCountryDataStat(countryDataStat, requestCount) {
         this.stats.push({
             countryName: countryDataStat.name.native,
             distance: countryDataStat.coordinates.distanceToBsAs,
-            requestCount: countryDataStat.requestCount
+            requestCount: requestCount
         })
     }
     setAverageDistance(averageDistance) {

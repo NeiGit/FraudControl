@@ -1,9 +1,10 @@
 import {Logger} from './logger.js'
-import {CountryDataDTO} from '../DTO2/countryDataDTO.js'
+import {CountryDataDTO} from '../DTO/countryDataDTO.js'
 import CurrencyCalculator from './currencyCalculator.js'
 import DistanceCalculator, {ARG_COORDINATES} from './distanceCalculator.js'
-import {CountryDataStatsDTO} from '../DTO2/countryDataStatsDTO.js'
+import {CountryDataStatsDTO} from '../DTO/countryDataStatsDTO.js'
 import TimeCalculator from './timeCalculator.js'
+import DatabaseManager from './databaseManager.js'
 
 const logger = new Logger('responseManager.js')
 
@@ -52,7 +53,7 @@ function local(distanceToBsAs) {
     return distanceToBsAs === 0
 }
 
-function buildCountryDataStatsResponseJson (countryDataStatRecords) {
+async function buildCountryDataStatsResponseJson (countryDataStatRecords) {
     logger.info( 'Building CountryDataStats json response')
     const dto = new CountryDataStatsDTO()
     
@@ -65,7 +66,9 @@ function buildCountryDataStatsResponseJson (countryDataStatRecords) {
     let nearestRequestDistance = Number.POSITIVE_INFINITY
     let nearestRequestCountry = ''
 
-    countryDataStatRecords.filter(record => !local(record.coordinates.distanceToBsAs)).forEach(record => {
+    const foreignRecords = countryDataStatRecords.filter(record => !local(record.coordinates.distanceToBsAs))
+    
+    for(const record of foreignRecords) {
         const {distanceToBsAs} = record.coordinates
         if ( distanceToBsAs > farestRequestDistance) {
             farestRequestDistance = distanceToBsAs
@@ -75,12 +78,12 @@ function buildCountryDataStatsResponseJson (countryDataStatRecords) {
             nearestRequestDistance = distanceToBsAs
             nearestRequestCountry = record.name.native
         }
-
-        const distanceMetric = DistanceCalculator.getDistanceMetric(record)
+        const requestCount = await DatabaseManager.getCounterCount(record.ISOcode)
+        const distanceMetric = DistanceCalculator.getDistanceMetric(record, requestCount)
+        requestAccumulator += requestCount
         distanceAccumulator += distanceMetric
-        requestAccumulator += record.requestCount
-        dto.addCountryDataStat(record)
-    })
+        dto.addCountryDataStat(record, requestCount)
+    }
 
     const averageDistance = DistanceCalculator.calculateAverageDistance(distanceAccumulator, requestAccumulator, 0)
     dto.setAverageDistance(averageDistance)

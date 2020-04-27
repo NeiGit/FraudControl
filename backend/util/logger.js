@@ -15,6 +15,10 @@ export class Logger {
     error(msg, error) {
         this.log('[ERROR]', msg + ' - ' + error)
     }
+
+    warning(msg, warning) {
+        this.log('[WARNING]', msg + ' - ' + warning)
+    }
 }
 
 

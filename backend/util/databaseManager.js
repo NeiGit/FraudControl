@@ -1,12 +1,10 @@
 import {Logger} from './logger.js'
 import CurrenciesModel from '../models/currencies.model.js'
+import CounterModel from '../models/counter.model.js'
 import CountryDataModel from '../models/countryData.model.js'
 import Err from './errorManager.js'
 import Database from '../database.js'
 import DistanceCalculator from './distanceCalculator.js'
-
-
-
 
 const logger =  new Logger('databaseManager.js')
 
@@ -19,18 +17,17 @@ async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
                 currenciesInfoModel.date = currenciesInfoJson.date
                 currenciesInfoModel.rates = currenciesInfoJson.rates
                 currenciesInfoModel.save()
-                logger.info("Succesfully persisted info model")
+                logger.info("Succesfully persisted currencies info model")
         })       
     } catch (err) {
         logger.error( "failed to persist currencies info model - ", err)
     }
 }
 
-
-function incrementCountryDataModelCounter(persistedCountryDataModel) {
-    persistedCountryDataModel.requestCount ++
-    if(persist(persistedCountryDataModel))
-        logger.info(`Updated CountryData model for '${persistedCountryDataModel.name.name}'. With this request its counter reached ${persistedCountryDataModel.requestCount} hits`)
+function incrementCounter(ISOcode) {
+    const hit = new CounterModel()
+    hit.ISOcode = ISOcode
+    persist(hit)
 }
 
 async function createCountryDataModel(countryDataJson) {
@@ -72,10 +69,13 @@ async function createCountryDataModel(countryDataJson) {
 function persist(model) {
     try {
         checkDatabaseStatus()
-        model.save()
+        model.save(function(err) {
+            if(err)
+                logger.warning("Model will not be persisted ", err)
+        })
         return true
     } catch (err) {
-        logger.error( "Failed when trying to create new CountryData model", err)
+        logger.error("Failed when trying to persist model", err)
         return false
     }
 }
@@ -92,7 +92,7 @@ async function findPersistedCountryDataModel(countryCode3) {
 async function getAllCountryDataStatRecords() {
     checkDatabaseStatus()
     if (await getDocumentCount(CountryDataModel) > 0)
-        return CountryDataModel.find({}, ('name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
+        return CountryDataModel.find({}, ('ISOcode name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
             if(err)
                 throw err
             else {
@@ -128,13 +128,25 @@ async function initDatabase () {
     await Database.init()
 }
 
+async function getCounterCount(ISOcode) {
+    return await CounterModel.countDocuments({ISOcode: ISOcode}, function(err, count) { 
+        if(err)
+            throw err
+        else {
+            return count
+        }
+})
+}
+
+
 export default {
     initDatabase,
     updateOrCreateCurrenciesInfo, 
     createCountryDataModel, 
-    incrementCountryDataModelCounter, 
+    incrementCounter, 
     findPersistedCountryDataModel,
     isDatabaseConnected,
     getAllCountryDataStatRecords,
-    getCurrenciesModel
+    getCurrenciesModel,
+    getCounterCount
 }
