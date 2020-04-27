@@ -1,5 +1,6 @@
 import CurrenciesModel from '../models/currencies.model.js'
 import {Logger} from './logger.js'
+import DatabaseManager from './databaseManager.js'
 
 const logger = new Logger('currencyCalculator.js')
 
@@ -11,7 +12,7 @@ const logger = new Logger('currencyCalculator.js')
  */
 async function convert(sourceRate, targetRate, sourceAmount) {
     try {
-        const currencies = await CurrenciesModel.findOne()
+        const currencies = await DatabaseManager.getCurrenciesModel()
         const {rates} = currencies
         logger.info(`About to convert ${sourceAmount} ${sourceRate} to ${targetRate}`)
         const baseAmount = sourceAmount / rates[sourceRate]
@@ -20,6 +21,7 @@ async function convert(sourceRate, targetRate, sourceAmount) {
         return targetAmount
     } catch (err) {
         logger.info('Failed to convert', err)
+        throw err
     }
 }
 

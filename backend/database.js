@@ -8,7 +8,7 @@ async function init() {
     dotenv.config()
     const uri = process.env.ATLAS_URI
 
-    logger.info( "Connecting to MongoDB database")
+    logger.info("Connecting to MongoDB database")
 
     try {
         await mongoose.connect(uri, {useNewUrlParser: true, useCreateIndex: true, useUnifiedTopology: true})

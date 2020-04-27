@@ -29,21 +29,12 @@ app.use('/', routes)
 
 // express error handler
 app.use((err, req, res, next) => {
-    res.status(err.status || 500)
-    res.json({
-        error: {
-            status: err.status,
-            message: err.message
-        }
-    })
+    res.status(err.status || 500).send(err.message)
 })
 
 // invalid route handler
 app.use((req, res, next) => {
-    res.status(404).send({
-    status: 404,
-    error: 'Not found'
-    })
+    res.status(404).send('Not found')
 })
 
 app.listen(app.get('port'), () => {

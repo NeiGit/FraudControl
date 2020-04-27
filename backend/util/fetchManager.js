@@ -30,7 +30,7 @@ async function fetchCountryData(countryCode3) {
         return r.json()
     } else {
         logger.error( `Failed while fetching country data for ${countryCode3}`)
-        throw Error(r.status, 'Bad country request')
+        throw Error(r.status, 'Ip does not belong to any country')
     }
 }
 

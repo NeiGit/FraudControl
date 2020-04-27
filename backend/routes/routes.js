@@ -1,13 +1,18 @@
 import express from 'express'
+import path from 'path'
 import DatabaseManager from '../util/databaseManager.js'
 import FetchManager from '../util/fetchManager.js'
 import ResponseManager from '../util/responseManager.js'
-
 const router = express.Router()
 
 router.get('/', (req, res) => {
     res.send("Welcome to Fraud Control. Trace an ip by requesting /traceip/AN_IP")
 })
+
+/* router.get('/', function(req, res) {
+    console.log(__dirname)
+    res.sendFile('../../client/index.html');
+}); */
 
 router.get('/traceip/:ip', async (req, res, next) => {
     try {
@@ -36,12 +41,16 @@ router.get('/traceip/:ip', async (req, res, next) => {
 })
 
 router.get('/statistics' , async (req, res, next) => {
+    try{
     const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
-    if(countryDataStatRecords.length) {
+    if(countryDataStatRecords) {
         const countryDataStatsResponseJson = ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
         res.status(200).json(countryDataStatsResponseJson)
     } else {
-        res.status(200).send("No hay peticiones registradas hasta el momento")
+        next()
+    }
+    } catch(err) {
+        next(err) 
     }    
 })
 

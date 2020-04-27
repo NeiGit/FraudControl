@@ -29,14 +29,13 @@ async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
 
 function incrementCountryDataModelCounter(persistedCountryDataModel) {
     persistedCountryDataModel.requestCount ++
-    persistedCountryDataModel.save()
-    logger.info(`Updated CountryData model for '${persistedCountryDataModel.name.name}'. With this request its counter reached ${persistedCountryDataModel.requestCount} hits`)
+    if(persist(persistedCountryDataModel))
+        logger.info(`Updated CountryData model for '${persistedCountryDataModel.name.name}'. With this request its counter reached ${persistedCountryDataModel.requestCount} hits`)
 }
 
 async function createCountryDataModel(countryDataJson) {
     logger.info(`Creating CountryData model for ${countryDataJson.name}`)
     try {
-        if(!isDatabaseConnected()) throw new Error('Database is not connected')
         const countryDataModel = new CountryDataModel()
 
         countryDataModel.ISOcode = countryDataJson.countryCode3 
@@ -53,7 +52,6 @@ async function createCountryDataModel(countryDataJson) {
         })
 
         countryDataModel.currency = countryDataJson.currencies[0].code,
-        
 
         countryDataJson.timezones.forEach(tz => {
             countryDataModel.timezones.push(tz)
@@ -63,16 +61,24 @@ async function createCountryDataModel(countryDataJson) {
            longitude: countryDataJson.latlng[1],
            distanceToBsAs: DistanceCalculator.getDistanceToBsAs(countryDataJson.latlng[0], countryDataJson.latlng[1], 0)
         }
-        // 
-        countryDataModel.save()
-        logger.info(`Created CountryData model for '${countryDataJson.name}'`)
+        if(persist(countryDataModel))
+            logger.info(`Created CountryData model for '${countryDataJson.name}'`)
         return countryDataModel
     } catch(err) {
-        logger.error( "Failed when trying to create new CountryData model", err)
         throw Err(500, `Failed when trying to create new CountryData model. ${err}` )
     }
 }
 
+function persist(model) {
+    try {
+        checkDatabaseStatus()
+        model.save()
+        return true
+    } catch (err) {
+        logger.error( "Failed when trying to create new CountryData model", err)
+        return false
+    }
+}
 
 async function findPersistedCountryDataModel(countryCode3) {
     if(isDatabaseConnected()) 
@@ -83,24 +89,43 @@ async function findPersistedCountryDataModel(countryCode3) {
     else return undefined    
 }
 
-async function initDatabase () {
-    await Database.init()
+async function getAllCountryDataStatRecords() {
+    checkDatabaseStatus()
+    if (await getDocumentCount(CountryDataModel) > 0)
+        return CountryDataModel.find({}, ('name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
+            if(err)
+                throw err
+            else {
+                return result
+            }
+        })
+    else throw Err(400, 'No hay peticiones registradas hasta el momento')     
+             
+}
+async function getDocumentCount(model) {
+    return await model.countDocuments({},function(err, count) { 
+        if(err)
+            throw err
+        else {
+            return count
+        }
+})}
+
+function getCurrenciesModel() {
+    checkDatabaseStatus()
+        return CurrenciesModel.findOne()
+}
+function checkDatabaseStatus(){
+    if(!isDatabaseConnected())
+        throw Err(500, 'Database is not connected')
 }
 
 function isDatabaseConnected() {
     return Database.checkStatus() === 1
 }
 
-function getAllCountryDataStatRecords() {
-    if(isDatabaseConnected()) 
-        return CountryDataModel.find({}, ('name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
-            if(err)
-                return undefined
-            else {
-                return result
-            }
-        })
-    else return undefined    
+async function initDatabase () {
+    await Database.init()
 }
 
 export default {
@@ -110,5 +135,6 @@ export default {
     incrementCountryDataModelCounter, 
     findPersistedCountryDataModel,
     isDatabaseConnected,
-    getAllCountryDataStatRecords
+    getAllCountryDataStatRecords,
+    getCurrenciesModel
 }

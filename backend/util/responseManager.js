@@ -1,8 +1,8 @@
 import {Logger} from './logger.js'
-import {CountryDataDTO} from '../DTOs/countryDataDTO.js'
+import {CountryDataDTO} from '../DTO2/countryDataDTO.js'
 import CurrencyCalculator from './currencyCalculator.js'
 import DistanceCalculator, {ARG_COORDINATES} from './distanceCalculator.js'
-import {CountryDataStatsDTO} from '../DTOs/countryDataStatsDTO.js'
+import {CountryDataStatsDTO} from '../DTO2/countryDataStatsDTO.js'
 import TimeCalculator from './timeCalculator.js'
 
 const logger = new Logger('responseManager.js')
@@ -20,6 +20,7 @@ async function buildCountryDataResponseJson(countryDataModel, ip) {
     dto.setISOcode(countryDataModel.ISOcode)
 
     dto.setLanguages(countryDataModel.languages)
+
     const USDEquivalence = await CurrencyCalculator.getUSDEquivalence(countryDataModel.currency)
     dto.setCurrencyInfo(countryDataModel.currency, USDEquivalence.toFixed(4))
 
@@ -30,10 +31,11 @@ async function buildCountryDataResponseJson(countryDataModel, ip) {
         const currentTime = new Date().setHours(TimeCalculator.getCurrentUTCHours() + hourDifference)
         currentTimes.push({date : new Date(currentTime), offset: tz})
     })
+    
     dto.setCurrentTimes(currentTimes)
     dto.setDistanceInfo(countryDataModel.coordinates, ARG_COORDINATES)
 
-    return formatResponse(dto)
+    return dto
 }
 
 
@@ -46,6 +48,10 @@ function formatResponse(dto) {
     return Object.keys(dto).map(function (key) { return dto[key]; })
 }
 
+function local(distanceToBsAs) {
+    return distanceToBsAs === 0
+}
+
 function buildCountryDataStatsResponseJson (countryDataStatRecords) {
     logger.info( 'Building CountryDataStats json response')
     const dto = new CountryDataStatsDTO()
@@ -54,18 +60,19 @@ function buildCountryDataStatsResponseJson (countryDataStatRecords) {
     let requestAccumulator = 0
 
     let farestRequestDistance = Number.NEGATIVE_INFINITY
-    let farestRequestCountry = ""
+    let farestRequestCountry = ''
 
     let nearestRequestDistance = Number.POSITIVE_INFINITY
-    let nearestRequestCountry = ""
+    let nearestRequestCountry = ''
 
-    countryDataStatRecords.forEach(record => {
-        if (record.coordinates.distanceToBsAs > farestRequestDistance) {
-            farestRequestDistance = record.coordinates.distanceToBsAs
+    countryDataStatRecords.filter(record => !local(record.coordinates.distanceToBsAs)).forEach(record => {
+        const {distanceToBsAs} = record.coordinates
+        if ( distanceToBsAs > farestRequestDistance) {
+            farestRequestDistance = distanceToBsAs
             farestRequestCountry = record.name.native
         }
-        if (record.coordinates.distanceToBsAs < nearestRequestDistance) {
-            nearestRequestDistance = record.coordinates.distanceToBsAs
+        if (distanceToBsAs < nearestRequestDistance) {
+            nearestRequestDistance = distanceToBsAs
             nearestRequestCountry = record.name.native
         }
 
@@ -80,8 +87,7 @@ function buildCountryDataStatsResponseJson (countryDataStatRecords) {
 
     dto.setFarestRequestInfo(farestRequestCountry, farestRequestDistance)
     dto.setNearestRequestInfo(nearestRequestCountry, nearestRequestDistance)
-
-    return formatResponse(dto)
+    return dto
 }
 
 

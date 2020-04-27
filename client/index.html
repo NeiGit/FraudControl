@@ -1,33 +1,189 @@
+<!DOCTYPE html>
+<html>
 <head>
+    <meta charset='utf-8'>
+    <meta http-equiv='X-UA-Compatible' content='IE=edge'>
+    <title>Ip tracker</title>
+    <meta name='viewport' content='width=device-width, initial-scale=1'>
+    <link rel='stylesheet' type='text/css' href = 'index.css'>
+    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
+    <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
+
+    <script src='main.js'></script>
 </head>
-
-<form>
-    <div class="form-group" id = 'query-form'>
-      <label for="country-query">Country:</label>
-      <input type="text" class="form-control" id="country-query">
+<body>
+    <div id="ipTracker" class = "ip-tracker">
+        <label style = "font-size: larger;" for ='ipQuery'>Ingrese una dirección IP</label>
+        <input type="text" class = "ip-tracker-query" style = "letter-spacing: 1pt;"        v-model="ipQuery" >
+        <button type = "button" class = "btn btn-primary ip-tracker-query" v-on:click="traceIp">Trace!</button>
+        <container class="sk-chase" v-if="spinner">
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+            <div class="sk-chase-dot"></div>
+        </container>
+        <hr/>
+        <div class="alert alert-danger alert-dismissible fade show" v-if="message.display">
+            {{message.text}}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        <ul v-if="display" class ="ip-tracker-ul">
+            <li>IP: {{countryDataInfo.ip}}, fecha actual: {{countryDataInfo.requestDate}}</li>
+            <li>País: {{countryDataInfo.nameInfo.nativeName}} ({{countryDataInfo.nameInfo.name}})</li>
+            <li>ISO Code: {{countryDataInfo.ISOcode}}</li>
+            <li>Idiomas: {{countryDataInfo.languages}}</li>
+            <li>Moneda: {{countryDataInfo.currencyInfo.rate}} (1 {{countryDataInfo.currencyInfo.rate}} = {{countryDataInfo.currencyInfo.USDequivalence}} U$D)</li>
+            <li>Hora: {{countryDataInfo.currentTimes}}</li>
+            <li>Distancia estimada: {{countryDataInfo.distanceInfo.distanceToBsAs}} kms ({{countryDataInfo.distanceInfo.argLtdLng}}) a ({{countryDataInfo.distanceInfo.ltdLng}})</li>
+        </ul>
     </div>
-    <div class="checkbox">
-      <label><input type="checkbox"> Remember me</label>
-    </div>
-    <button type="submit" class="btn btn-default">Submit</button>
-</form>
 
-<script> 
-    const form = document.getElementById('query-form')
-    form.addEventListener('submit', e => {
-        e.preventDefault()
-        const country_query = document.getElementById('country-query')
-        fetch(`https://restcountries.eu/rest/v2/name/${country_query}?fullText=true`)
-        .then(res => {
-            return res.json()
-        })
-        .then(object => {
-            console.log(object)
-            alert(object)
-        })
-        .catch( err =>  {
-            console.log(err)
-        })
+    <hr/>
+
+    <div id="countryDataStats" class = "stats">
+        <button type = "button" class = "btn btn-warning" v-on:click="loadStatistics">Cargar estadísticas </button>
+        <button type = "button" class = "btn btn-danger" style="margin-left: 20px;"v-on:click="hideTable" v-if='displayTable'>Ocultar</button>
+        <div class="alert alert-warning alert-dismissible fade show" v-if="message.display">
+            {{message.text}}
+            <button type="button" class="close" data-dismiss="alert">&times;</button>
+        </div>
+        <div v-if="displayTable">
+            <table class="table table-bordered stats-table">
+                <thead>
+                    <tr>
+                        <th>País</th>
+                        <th>Distancia</th>
+                        <th>Invocaciones</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr v-for="stat in stats">
+                        <td>{{stat.countryName}}</td>
+                        <td>{{stat.distance}} kms</td>
+                        <td>{{stat.requestCount}}</td>
+                    </tr>
+                </tbody>
+            </table>
+            <h5>Invocación más lejana: {{farestRequest.countryName}} - {{farestRequest.distance}} kms</h5>
+            <h5>Invocación más cercana: {{nearestRequest.countryName}} - {{nearestRequest.distance}} kms</h5>
+            <h5>Distancia promedio: {{averageDistance}} kms</h5>
+        </div>    
+    </div>
+</body>
+
+
+
+
+
+<script>
+    var ipTracker = new Vue ({
+            el: '#ipTracker',
+            data: {
+                ipQuery: '0.0.0.0',
+                countryDataInfo: {
+                    ip:'',
+                    requestDate:'',
+                    nameInfo:{},
+                    ISOcode:'',
+                    currencyInfo:{},
+                    languages:[],
+                    currentTimes:[],
+                    distanceInfo:{}
+                },
+            display: false,
+            spinner: false,
+            message: {
+                display:false,
+                text:''
+            }
+            },
+            methods: {
+                traceIp: async function() {
+                    this.resetFields()
+                    this.showSpinner()
+                    const response = await fetch(`http://localhost:3000/traceip/${this.ipQuery}`)
+                    this.hideSpinner()
+                    if(response.status === 200) {
+                        const responseJson = await response.json()
+                        this.setCountryDataInfo(responseJson)
+                        this.display = true
+                    } else {
+                        const message = await response.text()
+                        this.message.display = true
+                        this.message.text = message
+                    }
+                },
+                resetFields: function() {
+                    this.display = false
+                    this.message.display = false
+                    this.message.text = ''
+                },
+                setCountryDataInfo: function(countryDataDTOJson) {
+                    const {ip, requestDate, nameInfo, ISOcode, currencyInfo, languages, currentTimes, distanceInfo} = countryDataDTOJson
+                    this.countryDataInfo.ip = ip
+                    this.countryDataInfo.requestDate = requestDate
+                    this.countryDataInfo.nameInfo = nameInfo
+                    this.countryDataInfo.ISOcode = ISOcode
+                    this.countryDataInfo.currencyInfo = currencyInfo
+                    this.countryDataInfo.languages = languages
+                    this.countryDataInfo.currentTimes = currentTimes
+                    this.countryDataInfo.distanceInfo = distanceInfo
+                },
+                showSpinner: function() {this.spinner = true},
+                hideSpinner: function() {this.spinner = false}
+            },
+    })
+    var countryDataStats = new Vue({
+        el: '#countryDataStats',
+        data: {
+            displayTable: false,
+            message: {
+                display:false,
+                text:''
+            },
+            stats: [
+            ],
+            farestRequest: {},
+            nearestRequest: {},
+            averageDistance:''
+        },
+        methods:{
+            loadStatistics: async function() {
+                const response = await fetch(`http://localhost:3000/statistics`)
+                if (response.status === 200) {
+                    const countryStatsJson = await response.json()
+                    this.populateTable(countryStatsJson)
+                } else {
+                    const message = await response.text()
+                    this.message.display = true
+                    this.message.text = message
+                }
+                
+                const emptyTable = this.stats.length === 0
+                this.displayTable = !emptyTable
+            },
+            hideTable: function(){
+                this.displayTable = false
+            },
+            populateTable: function(countryStatsDTOJson) {
+                const {stats, farestRequestInfo, nearestRequestInfo, averageDistance} = countryStatsDTOJson
+                this.stats = []
+                stats.forEach(s => {
+                    this.stats.push({
+                        countryName: s.countryName,
+                        distance: s.distance,
+                        requestCount: s.requestCount
+                    })
+                })
+                
+                this.farestRequest = farestRequestInfo,
+                this.nearestRequest = nearestRequestInfo,
+                this.averageDistance = averageDistance
+            }
+        }
     })
 </script>
+</html>
