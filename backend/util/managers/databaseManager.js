@@ -1,10 +1,10 @@
-import {Logger} from './logger.js'
-import CurrenciesModel from '../models/currencies.model.js'
-import CounterModel from '../models/counter.model.js'
-import CountryDataModel from '../models/countryData.model.js'
-import Err from './errorManager.js'
-import Database from '../database.js'
-import DistanceCalculator from './distanceCalculator.js'
+import {Logger} from '../services/logger.js'
+import CurrenciesModel from '../../models/currencies.model.js'
+import CounterModel from '../../models/counter.model.js'
+import CountryDataModel from '../../models/countryData.model.js'
+import Err from '../services/errorBuilder.js'
+import Database from '../../database.js'
+import DistanceCalculator from '../calculators/distanceCalculator.js'
 
 const logger =  new Logger('databaseManager.js')
 
@@ -13,14 +13,15 @@ async function updateOrCreateCurrenciesInfo(currenciesInfoJson) {
     try {
         await CurrenciesModel.findOne((err, persisted) => {
             const currenciesInfoModel = persisted ? persisted : new CurrenciesModel()
-                currenciesInfoModel.base = currenciesInfoJson.base
-                currenciesInfoModel.date = currenciesInfoJson.date
-                currenciesInfoModel.rates = currenciesInfoJson.rates
+            const {base, date, rates} = currenciesInfoJson
+                currenciesInfoModel.base = base
+                currenciesInfoModel.date = date
+                currenciesInfoModel.rates = rates
                 currenciesInfoModel.save()
                 logger.info("Succesfully persisted currencies info model")
         })       
     } catch (err) {
-        logger.error( "failed to persist currencies info model - ", err)
+        logger.error("Failed when trying to persist currencies info model - ", err)
     }
 }
 
@@ -68,7 +69,7 @@ async function createCountryDataModel(countryDataJson) {
 
 function persist(model) {
     try {
-        checkDatabaseStatus()
+        validateDatabaseStatus()
         model.save(function(err) {
             if(err)
                 logger.warning("Model will not be persisted ", err)
@@ -81,16 +82,15 @@ function persist(model) {
 }
 
 async function findPersistedCountryDataModel(countryCode3) {
-    if(isDatabaseConnected()) 
-        return CountryDataModel.findOne({ISOcode: countryCode3}, function(err, result) {
-            if (err) return undefined
-            else return result
-        })
-    else return undefined    
+    validateDatabaseStatus()
+    return CountryDataModel.findOne({ISOcode: countryCode3}, function(err, result) {
+        if (err) return undefined
+        else return result
+    }) 
 }
 
 async function getAllCountryDataStatRecords() {
-    checkDatabaseStatus()
+    validateDatabaseStatus()
     if (await getDocumentCount(CountryDataModel) > 0)
         return CountryDataModel.find({}, ('ISOcode name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
             if(err)
@@ -103,6 +103,7 @@ async function getAllCountryDataStatRecords() {
              
 }
 async function getDocumentCount(model) {
+    validateDatabaseStatus()
     return await model.countDocuments({},function(err, count) { 
         if(err)
             throw err
@@ -112,10 +113,11 @@ async function getDocumentCount(model) {
 })}
 
 function getCurrenciesModel() {
-    checkDatabaseStatus()
+    validateDatabaseStatus()
         return CurrenciesModel.findOne()
 }
-function checkDatabaseStatus(){
+
+function validateDatabaseStatus(){
     if(!isDatabaseConnected())
         throw Err(500, 'Database is not connected')
 }
@@ -135,7 +137,7 @@ async function getCounterCount(ISOcode) {
         else {
             return count
         }
-})
+    })
 }
 
 

@@ -1,9 +1,9 @@
-import {Logger} from './logger.js'
-import {CountryDataDTO} from '../DTO/countryDataDTO.js'
-import CurrencyCalculator from './currencyCalculator.js'
-import DistanceCalculator, {ARG_COORDINATES} from './distanceCalculator.js'
-import {CountryDataStatsDTO} from '../DTO/countryDataStatsDTO.js'
-import TimeCalculator from './timeCalculator.js'
+import {Logger} from '../services/logger.js'
+import {CountryDataDTO} from '../../DTO/countryDataDTO.js'
+import CurrencyCalculator from '../calculators/currencyCalculator.js'
+import DistanceCalculator, {ARG_COORDINATES} from '../calculators/distanceCalculator.js'
+import {CountryDataStatsDTO} from '../../DTO/countryDataStatsDTO.js'
+import TimeCalculator from '../calculators/timeCalculator.js'
 import DatabaseManager from './databaseManager.js'
 
 const logger = new Logger('responseManager.js')
@@ -90,6 +90,7 @@ async function buildCountryDataStatsResponseJson (countryDataStatRecords) {
 
     dto.setFarestRequestInfo(farestRequestCountry, farestRequestDistance)
     dto.setNearestRequestInfo(nearestRequestCountry, nearestRequestDistance)
+
     return dto
 }
 

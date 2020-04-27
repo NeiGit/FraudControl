@@ -1,18 +1,12 @@
 import express from 'express'
-import path from 'path'
-import DatabaseManager from '../util/databaseManager.js'
-import FetchManager from '../util/fetchManager.js'
-import ResponseManager from '../util/responseManager.js'
+import DatabaseManager from '../util/managers/databaseManager.js'
+import FetchManager from '../util/managers/fetchManager.js'
+import ResponseManager from '../util/managers/responseManager.js'
 const router = express.Router()
 
 router.get('/', (req, res) => {
-    res.send("Welcome to Fraud Control. Trace an ip by requesting /traceip/AN_IP")
+    res.send("Bienvenido al control de peticiones. Consulte información sobre cualquier dirección ip con un GET a /traceip/:ip. O consulte estadísticas con un GET a /stats")
 })
-
-/* router.get('/', function(req, res) {
-    console.log(__dirname)
-    res.sendFile('../../client/index.html');
-}); */
 
 router.get('/traceip/:ip', async (req, res, next) => {
     try {
@@ -21,16 +15,18 @@ router.get('/traceip/:ip', async (req, res, next) => {
 
         const countryCode3 = ipDataJson.countryCode3
         const persistedCountryDataModel = await DatabaseManager.findPersistedCountryDataModel(countryCode3)
+
         if (persistedCountryDataModel) {
             DatabaseManager.incrementCounter(persistedCountryDataModel.ISOcode)
             const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(persistedCountryDataModel, ip)
             res.json(countryDataResponseJson)
+
         } else {
             const countryDataJson = await FetchManager.fetchCountryData(countryCode3)
             countryDataJson.countryCode3 = countryCode3
 
             const newCountryDataModel = await DatabaseManager.createCountryDataModel(countryDataJson)
-            DatabaseManager.incrementCountryDataModelCounter(newCountryDataModel.ISOcode)
+            DatabaseManager.incrementCounter(newCountryDataModel.ISOcode)
 
             const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(newCountryDataModel, ip)
             res.json(countryDataResponseJson)
@@ -41,7 +37,7 @@ router.get('/traceip/:ip', async (req, res, next) => {
     }
 })
 
-router.get('/statistics' , async (req, res, next) => {
+router.get('/stats' , async (req, res, next) => {
     try{
         const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
         if(countryDataStatRecords) {
@@ -54,8 +50,5 @@ router.get('/statistics' , async (req, res, next) => {
         next(err) 
     }    
 })
-
-
-
 
 export default router    

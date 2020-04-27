@@ -1,7 +1,7 @@
 import fetch from 'node-fetch'
-import {Logger} from './logger.js'
-import Urls from '../routes/urls.js'
-import Error from './errorManager.js'
+import {Logger} from '../services/logger.js'
+import Urls from '../../routes/urls.js'
+import Error from '../services/errorBuilder.js'
 
 const logger = new Logger('fetchManager.js')
 

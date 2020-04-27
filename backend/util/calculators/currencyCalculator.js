@@ -1,6 +1,6 @@
-import CurrenciesModel from '../models/currencies.model.js'
-import {Logger} from './logger.js'
-import DatabaseManager from './databaseManager.js'
+import CurrenciesModel from '../../models/currencies.model.js'
+import {Logger} from '../services/logger.js'
+import DatabaseManager from '../managers/databaseManager.js'
 
 const logger = new Logger('currencyCalculator.js')
 
@@ -20,7 +20,7 @@ async function convert(sourceRate, targetRate, sourceAmount) {
         logger.info(`${sourceAmount} ${sourceRate} are equivalent to ${targetAmount.toFixed(4)} ${targetRate}`)
         return targetAmount
     } catch (err) {
-        logger.info('Failed to convert', err)
+        logger.error('Failed to convert', err)
         throw err
     }
 }

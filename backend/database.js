@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import dotenv from 'dotenv'
-import {Logger} from './util/logger.js'
+import {Logger} from './util/services/logger.js'
 
 const logger = new Logger('database.js')
 

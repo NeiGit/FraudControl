@@ -154,7 +154,7 @@
         methods:{
             loadStatistics: async function() {
                 this.displayTable = false
-                const response = await fetch(`http://localhost:3000/statistics`)
+                const response = await fetch(`http://localhost:3000/stats`)
                 if (response.status === 200) {
                     const countryStatsJson = await response.json()
                     this.populateTable(countryStatsJson)

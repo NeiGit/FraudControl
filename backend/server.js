@@ -2,10 +2,10 @@ import express from 'express'
 import morgan from 'morgan'
 import routes from './routes/routes.js'
 import cors from 'cors'
-import DatabaseManager from './util/databaseManager.js'
-import FetchManager from './util/fetchManager.js'
-import TimeCalculator from './util/timeCalculator.js'
-import {Logger} from './util/logger.js'
+import DatabaseManager from './util/managers/databaseManager.js'
+import FetchManager from './util/managers/fetchManager.js'
+import TimeCalculator from './util/calculators/timeCalculator.js'
+import {Logger} from './util/services/logger.js'
 
 
 const app = express()
@@ -34,7 +34,7 @@ app.use((err, req, res, next) => {
 
 // invalid route handler
 app.use((req, res, next) => {
-    res.status(404).send('Not found')
+    res.status(404).send('Ups, parece que solicitaste una ruta que no existe')
 })
 
 app.listen(app.get('port'), () => {
@@ -61,9 +61,9 @@ async function afterStartup() {
     await DatabaseManager.initDatabase()
     if (DatabaseManager.isDatabaseConnected()) {
         clearInterval(databaseRetryProcess)
-       // await refreshCurrenciesInfo()
-        /* logger.info(`Currencies info will be refetched every ${CURRENCIES_INFO_REFETCH_INTERVAL} minutes`)
-        setInterval(refreshCurrenciesInfo, TimeCalculator.minutes(CURRENCIES_INFO_REFETCH_INTERVAL)); */
+        await refreshCurrenciesInfo()
+        logger.info(`Currencies info will be refetched every ${CURRENCIES_INFO_REFETCH_INTERVAL} minutes`)
+        setInterval(refreshCurrenciesInfo, TimeCalculator.minutes(CURRENCIES_INFO_REFETCH_INTERVAL));
     }
 }
 
