@@ -73,11 +73,8 @@ async function buildCountryDataStatsResponseJson (countryDataStatRecords) {
 
     let nearestRequestDistance = Number.POSITIVE_INFINITY
     let nearestRequestCountry = ''
-
-    // Argentina is not considered since its attribute distanceToBsAs is zero
-    const foreignRecords = countryDataStatRecords.filter(record => !local(record.coordinates.distanceToBsAs))
     
-    for (const record of foreignRecords) {
+    for (const record of countryDataStatRecords) {
         const {distanceToBsAs} = record.coordinates
         if ( distanceToBsAs > farestRequestDistance) {
             farestRequestDistance = distanceToBsAs

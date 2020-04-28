@@ -92,10 +92,11 @@ async function findPersistedCountryDataModel(countryCode3) {
 
 /** Resturns a custom collection based on CountryDataModel documents. Collects only the attributes that the invoker requires
  */
-async function getCountryDataStatsRecords() {
+async function getCountryDataStatsRecords(includeArg = false) {
     validateDatabaseStatus()
-    if (await getDocumentCount(CountryDataModel) > 0)
-        return CountryDataModel.find({}, ('ISOcode name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
+    const exclude = includeArg ? '' : 'ARG'
+    if (await getCountryDataModelCount(exclude) > 0)
+        return CountryDataModel.find({ISOcode: {$ne: exclude}}, ('ISOcode name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
             if(err)
                 throw err
             else {
@@ -103,17 +104,11 @@ async function getCountryDataStatsRecords() {
             }
         })
     else throw Err(400, 'No hay peticiones registradas hasta el momento')     
-             
 }
-async function getDocumentCount(model) {
+async function getCountryDataModelCount(exclude) {
     validateDatabaseStatus()
-    return await model.countDocuments({},function(err, count) { 
-        if(err)
-            throw err
-        else {
-            return count
-        }
-})}
+        return await CountryDataModel.where({ISOcode: {$ne: exclude}}).countDocuments()
+}
 
 function getCurrenciesModel() {
     validateDatabaseStatus()

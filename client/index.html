@@ -47,6 +47,10 @@
             <div class="double-bounce2"></div>
         </container>
         <button type = "button" class = "btn btn-danger" style="margin-left: 20px;"v-on:click="hideTable" v-if='displayTable'>Ocultar</button>
+        <div>
+            <input class = "include-arg" type="checkbox" id="checkbox" v-model="includeArg">
+            <label for="checkbox">Incluir a Argentina (peticiones locales)</label>
+        </div>
         <div class="alert alert-warning alert-dismissible fade show" v-if="message.display">
             {{message.text}}
             <button type="button" class="close" data-dismiss="alert">&times;</button>
@@ -105,7 +109,7 @@
                 traceIp: async function() {
                     this.resetFields()
                     this.showSpinner()
-                    const response = await fetch(`http://localhost:3000/traceip/${this.ipQuery}`)
+                    const response = await fetch(`http://localhost:4000/traceip/${this.ipQuery}`)
                     this.hideSpinner()
                     if(response.status === 200) {
                         const responseJson = await response.json()
@@ -157,13 +161,17 @@
             farestRequest: {},
             nearestRequest: {},
             averageDistance:'',
+
+            includeArg: false,
             spinner: false
         },
         methods:{
             loadStatistics: async function() {
                 this.showSpinner()
+                this.clearData()
                 this.displayTable = false
-                const response = await fetch(`http://localhost:3000/stats`)
+                const endRoute = this.includeArg ? 'arg' : ''
+                const response = await fetch(`http://localhost:4000/stats/${endRoute}`)
                 if (response.status === 200) {
                     const countryStatsJson = await response.json()
                     this.populateTable(countryStatsJson)
@@ -176,6 +184,7 @@
                 if (this.countryStats.length > 0) {
                     this.showTable()
                     this.btnText = 'Refrescar'
+                    this.message.display = false
                 } 
                 this.hideSpinner()
             }
@@ -183,13 +192,18 @@
             showTable: function() {
                 this.displayTable = true
             },
-            hideTable: function(){
+            hideTable: function() {
                 this.displayTable = false
                 this.btnText = 'Cargar estadísticas'
             },
+            clearData : function() {
+                this.countryStats = []
+                this.farestRequest= {}
+                this.nearestRequest= {}
+                this.averageDistance=''
+            },
             populateTable: function(countryStatsDTOJson) {
                 const {countryStats, farestRequestInfo, nearestRequestInfo, averageDistance} = countryStatsDTOJson
-                this.countryStats = []
                 countryStats.forEach(s => {
                     this.countryStats.push({
                         countryName: s.countryName,

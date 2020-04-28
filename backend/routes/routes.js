@@ -52,6 +52,18 @@ router.get('/traceip/:ip', async (req, res, next) => {
 router.get('/stats' , async (req, res, next) => {
     try {
         const countryDataStatRecords = await DatabaseManager.getCountryDataStatsRecords()
+        console.log(countryDataStatRecords)
+        const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
+        res.status(200).json(countryDataStatsResponseJson)
+    } catch(err) {
+        next(err) 
+    }    
+})
+
+router.get('/stats/arg' , async (req, res, next) => {
+    try {
+        const countryDataStatRecords = await DatabaseManager.getCountryDataStatsRecords(true)
+        console.log(countryDataStatRecords)
         const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
         res.status(200).json(countryDataStatsResponseJson)
     } catch(err) {
