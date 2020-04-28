@@ -14,7 +14,7 @@
         <label style = "font-size: larger;" for ='ipQuery'>Ingrese una dirección IP</label>
         <input type="text" class = "ip-tracker-query" style = "letter-spacing: 1pt;"        v-model="ipQuery" >
         <button type = "button" class = "btn btn-primary ip-tracker-query" v-on:click="traceIp">Trace!</button>
-        <container name = "cont1" class="sk-chase" v-if="spinner">
+        <container class="sk-chase" v-if="spinner">
             <div class="sk-chase-dot"></div>
             <div class="sk-chase-dot"></div>
             <div class="sk-chase-dot"></div>
@@ -42,6 +42,10 @@
 
     <div id="countryDataStats" class = "stats">
         <button type = "button" class = "btn btn-warning" v-on:click="loadStatistics"> {{btnText}} </button>
+        <container class="spinner" v-if="spinner">
+            <div class="double-bounce1"></div>
+            <div class="double-bounce2"></div>
+        </container>
         <button type = "button" class = "btn btn-danger" style="margin-left: 20px;"v-on:click="hideTable" v-if='displayTable'>Ocultar</button>
         <div class="alert alert-warning alert-dismissible fade show" v-if="message.display">
             {{message.text}}
@@ -152,10 +156,12 @@
             ],
             farestRequest: {},
             nearestRequest: {},
-            averageDistance:''
+            averageDistance:'',
+            spinner: false
         },
         methods:{
             loadStatistics: async function() {
+                this.showSpinner()
                 this.displayTable = false
                 const response = await fetch(`http://localhost:3000/stats`)
                 if (response.status === 200) {
@@ -171,6 +177,7 @@
                     this.showTable()
                     this.btnText = 'Refrescar'
                 } 
+                this.hideSpinner()
             }
             ,
             showTable: function() {
@@ -194,7 +201,9 @@
                 this.farestRequest = farestRequestInfo,
                 this.nearestRequest = nearestRequestInfo,
                 this.averageDistance = averageDistance
-            }
+            },
+            showSpinner: function() {this.spinner = true},
+            hideSpinner: function() {this.spinner = false}
         }
     })
 </script>
