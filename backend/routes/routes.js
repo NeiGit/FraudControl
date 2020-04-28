@@ -9,6 +9,9 @@ import {Logger} from '../util/services/logger.js'
 const router = express.Router()
 const logger = new Logger('routes.js')
 
+router.get('/', (req, res) => {
+    res.send('Bienvenido a IpControl')
+})
 
 /** Default client view for consumig the server. Use only if cant access index.html
  */
@@ -52,7 +55,6 @@ router.get('/traceip/:ip', async (req, res, next) => {
 router.get('/stats' , async (req, res, next) => {
     try {
         const countryDataStatRecords = await DatabaseManager.getCountryDataStatsRecords()
-        console.log(countryDataStatRecords)
         const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
         res.status(200).json(countryDataStatsResponseJson)
     } catch(err) {
@@ -63,7 +65,6 @@ router.get('/stats' , async (req, res, next) => {
 router.get('/stats/arg' , async (req, res, next) => {
     try {
         const countryDataStatRecords = await DatabaseManager.getCountryDataStatsRecords(true)
-        console.log(countryDataStatRecords)
         const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
         res.status(200).json(countryDataStatsResponseJson)
     } catch(err) {

@@ -61,7 +61,7 @@ async function createCountryDataModel(countryDataJson) {
            distanceToBsAs: DistanceCalculator.getDistanceToBsAs(countryDataJson.latlng[0], countryDataJson.latlng[1], 0)
         }
         if(persist(countryDataModel))
-            logger.info(`Created CountryData model for ${countryDataJson.name}`)
+            logger.info(`Database processed CountryData model for ${countryDataJson.name}`)
         return countryDataModel
     } catch(err) {
         throw Err(500, `Failed when trying to create new CountryData model. ${err}` )

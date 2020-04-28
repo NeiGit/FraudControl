@@ -3,13 +3,14 @@
 <head>
     <meta charset='utf-8'>
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
-    <title>Ip tracker</title>
+    <title>Ip Control</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
     <link rel='stylesheet' type='text/css' href = './index.css'>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
 </head>
 <body>
+    <h4 class = "personal-data">Nicolás Ortolá - nicolasortola91@gmail.com - 11-61823628</h4>
     <div id="ipTracker" class = "ip-tracker">
         <label style = "font-size: larger;" for ='ipQuery'>Ingrese una dirección IP</label>
         <input type="text" class = "ip-tracker-query" style = "letter-spacing: 1pt;"        v-model="ipQuery" >
@@ -25,7 +26,6 @@
         <hr/>
         <div class="alert alert-danger alert-dismissible fade show" v-if="message.display">
             {{message.text}}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         <ul v-if="display" class ="ip-tracker-ul">
             <li>IP: {{countryDataInfo.ip}}, fecha actual: {{countryDataInfo.requestDate}}</li>
@@ -53,7 +53,6 @@
         </div>
         <div class="alert alert-warning alert-dismissible fade show" v-if="message.display">
             {{message.text}}
-            <button type="button" class="close" data-dismiss="alert">&times;</button>
         </div>
         <div v-if="displayTable">
             <table class="table table-bordered stats-table">
@@ -109,7 +108,7 @@
                 traceIp: async function() {
                     this.resetFields()
                     this.showSpinner()
-                    const response = await fetch(`http://localhost:4000/traceip/${this.ipQuery}`)
+                    const response = await fetch(`http://localhost:3000/traceip/${this.ipQuery}`)
                     this.hideSpinner()
                     if(response.status === 200) {
                         const responseJson = await response.json()
@@ -171,7 +170,7 @@
                 this.clearData()
                 this.displayTable = false
                 const endRoute = this.includeArg ? 'arg' : ''
-                const response = await fetch(`http://localhost:4000/stats/${endRoute}`)
+                const response = await fetch(`http://localhost:3000/stats/${endRoute}`)
                 if (response.status === 200) {
                     const countryStatsJson = await response.json()
                     this.populateTable(countryStatsJson)
