@@ -51,10 +51,6 @@ function getHourDifference(timezone) {
     return isNaN(hourDifference) ? 0 : hourDifference
 }
 
-function local(distanceToBsAs) {
-    return distanceToBsAs === 0
-}
-
 /** Builds and returns a DTO response from a given array of statistics. This array consist in specific attributes collected from CountryDataModel database
  * collection. Also calculates not-persisted statistics like requests total count or average distance. 
  * @param  {} countryDataModel
