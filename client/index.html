@@ -5,19 +5,16 @@
     <meta http-equiv='X-UA-Compatible' content='IE=edge'>
     <title>Ip tracker</title>
     <meta name='viewport' content='width=device-width, initial-scale=1'>
-    <link rel='stylesheet' type='text/css' href = 'index.css'>
-    <link rel='stylesheet' type='text/css' media='screen' href='main.css'>
+    <link rel='stylesheet' type='text/css' href = './index.css'>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css" integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh" crossorigin="anonymous">
     <script src="https://cdn.jsdelivr.net/npm/vue/dist/vue.js"></script>
-
-    <script src='main.js'></script>
 </head>
 <body>
     <div id="ipTracker" class = "ip-tracker">
         <label style = "font-size: larger;" for ='ipQuery'>Ingrese una dirección IP</label>
         <input type="text" class = "ip-tracker-query" style = "letter-spacing: 1pt;"        v-model="ipQuery" >
         <button type = "button" class = "btn btn-primary ip-tracker-query" v-on:click="traceIp">Trace!</button>
-        <container class="sk-chase" v-if="spinner">
+        <container name = "cont1" class="sk-chase" v-if="spinner">
             <div class="sk-chase-dot"></div>
             <div class="sk-chase-dot"></div>
             <div class="sk-chase-dot"></div>
@@ -35,7 +32,7 @@
             <li>País: {{countryDataInfo.nameInfo.nativeName}} ({{countryDataInfo.nameInfo.name}})</li>
             <li>ISO Code: {{countryDataInfo.ISOcode}}</li>
             <li>Idiomas: {{countryDataInfo.languages}}</li>
-            <li>Moneda: {{countryDataInfo.currencyInfo.rate}} (1 {{countryDataInfo.currencyInfo.rate}} = {{countryDataInfo.currencyInfo.USDequivalence}} U$D)</li>
+            <li>Moneda: {{countryDataInfo.currencyInfo.rate}} {{getCurrencyInfoLabel}} </li>
             <li>Hora: {{countryDataInfo.currentTimes}}</li>
             <li>Distancia estimada: {{countryDataInfo.distanceInfo.distanceToBsAs}} kms ({{countryDataInfo.distanceInfo.argLtdLng}}) a ({{countryDataInfo.distanceInfo.ltdLng}})</li>
         </ul>
@@ -60,7 +57,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    <tr v-for="stat in stats">
+                    <tr v-for="stat in countryStats">
                         <td>{{stat.countryName}}</td>
                         <td>{{stat.distance}} kms</td>
                         <td>{{stat.requestCount}}</td>
@@ -127,14 +124,20 @@
                     this.countryDataInfo.requestDate = requestDate
                     this.countryDataInfo.nameInfo = nameInfo
                     this.countryDataInfo.ISOcode = ISOcode
-                    this.countryDataInfo.currencyInfo = currencyInfo
+                    this.countryDataInfo.currencyInfo = {rate: currencyInfo.rate, USDequivalence: currencyInfo.USDequivalence}
                     this.countryDataInfo.languages = languages
                     this.countryDataInfo.currentTimes = currentTimes
                     this.countryDataInfo.distanceInfo = distanceInfo
                 },
                 showSpinner: function() {this.spinner = true},
                 hideSpinner: function() {this.spinner = false}
+              
             },
+            computed: {
+                getCurrencyInfoLabel : function() {
+                    return this.countryDataInfo.currencyInfo.USDequivalence ? ` (1 ${this.countryDataInfo.currencyInfo.rate} = ${this.countryDataInfo.currencyInfo.USDequivalence} U$D)`: ' - Cotización en U$D no disponible'
+                }
+            }    
     })
     var countryDataStats = new Vue({
         el: '#countryDataStats',
@@ -145,7 +148,7 @@
                 display:false,
                 text:''
             },
-            stats: [
+            countryStats: [
             ],
             farestRequest: {},
             nearestRequest: {},
@@ -164,7 +167,7 @@
                     this.message.text = message
                 }
                 
-                if (this.stats.length > 0) {
+                if (this.countryStats.length > 0) {
                     this.showTable()
                     this.btnText = 'Refrescar'
                 } 
@@ -178,10 +181,10 @@
                 this.btnText = 'Cargar estadísticas'
             },
             populateTable: function(countryStatsDTOJson) {
-                const {stats, farestRequestInfo, nearestRequestInfo, averageDistance} = countryStatsDTOJson
-                this.stats = []
-                stats.forEach(s => {
-                    this.stats.push({
+                const {countryStats, farestRequestInfo, nearestRequestInfo, averageDistance} = countryStatsDTOJson
+                this.countryStats = []
+                countryStats.forEach(s => {
+                    this.countryStats.push({
                         countryName: s.countryName,
                         distance: s.distance,
                         requestCount: s.requestCount

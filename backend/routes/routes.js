@@ -2,10 +2,21 @@ import express from 'express'
 import DatabaseManager from '../util/managers/databaseManager.js'
 import FetchManager from '../util/managers/fetchManager.js'
 import ResponseManager from '../util/managers/responseManager.js'
-const router = express.Router()
+import path from 'path'
+import { fileURLToPath } from 'url';
+import {Logger} from '../util/services/logger.js'
 
-router.get('/', (req, res) => {
-    res.send("Bienvenido al control de peticiones. Consulte información sobre cualquier dirección ip con un GET a /traceip/:ip. O consulte estadísticas con un GET a /stats")
+const router = express.Router()
+const logger = new Logger('routes.js')
+
+
+/** Default client view for consumig the server. Use only if cant access index.html
+ */
+router.get('/client', (req, res) => {
+    const __dirname = fileURLToPath(import.meta.url);
+    res.sendFile('index.html', {
+        root: path.join(__dirname, '../../../client')
+    })
 })
 
 router.get('/traceip/:ip', async (req, res, next) => {
@@ -17,6 +28,7 @@ router.get('/traceip/:ip', async (req, res, next) => {
         const persistedCountryDataModel = await DatabaseManager.findPersistedCountryDataModel(countryCode3)
 
         if (persistedCountryDataModel) {
+            logger.info(`Existing model found in database for ${countryCode3}`)
             DatabaseManager.incrementCounter(persistedCountryDataModel.ISOcode)
             const countryDataResponseJson = await ResponseManager.buildCountryDataResponseJson(persistedCountryDataModel, ip)
             res.json(countryDataResponseJson)
@@ -38,17 +50,13 @@ router.get('/traceip/:ip', async (req, res, next) => {
 })
 
 router.get('/stats' , async (req, res, next) => {
-    try{
-        const countryDataStatRecords = await DatabaseManager.getAllCountryDataStatRecords()
-        if(countryDataStatRecords) {
-            const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
-            res.status(200).json(countryDataStatsResponseJson)
-        } else {
-            next()
-        }
+    try {
+        const countryDataStatRecords = await DatabaseManager.getCountryDataStatsRecords()
+        const countryDataStatsResponseJson = await ResponseManager.buildCountryDataStatsResponseJson(countryDataStatRecords)
+        res.status(200).json(countryDataStatsResponseJson)
     } catch(err) {
         next(err) 
     }    
 })
 
-export default router    
+export default router

@@ -57,10 +57,11 @@ async function createCountryDataModel(countryDataJson) {
         countryDataModel.coordinates = {
            latitude: countryDataJson.latlng[0],
            longitude: countryDataJson.latlng[1],
+           // we decided to persist 'distanceToBsAs' to avoid recalculation when building statistics
            distanceToBsAs: DistanceCalculator.getDistanceToBsAs(countryDataJson.latlng[0], countryDataJson.latlng[1], 0)
         }
         if(persist(countryDataModel))
-            logger.info(`Created CountryData model for '${countryDataJson.name}'`)
+            logger.info(`Created CountryData model for ${countryDataJson.name}`)
         return countryDataModel
     } catch(err) {
         throw Err(500, `Failed when trying to create new CountryData model. ${err}` )
@@ -89,7 +90,9 @@ async function findPersistedCountryDataModel(countryCode3) {
     }) 
 }
 
-async function getAllCountryDataStatRecords() {
+/** Resturns a custom collection based on CountryDataModel documents. Collects only the attributes that the invoker requires
+ */
+async function getCountryDataStatsRecords() {
     validateDatabaseStatus()
     if (await getDocumentCount(CountryDataModel) > 0)
         return CountryDataModel.find({}, ('ISOcode name.native coordinates.distanceToBsAs requestCount'), function(err, result) {
@@ -140,15 +143,14 @@ async function getCounterCount(ISOcode) {
     })
 }
 
-
 export default {
     initDatabase,
+    isDatabaseConnected,
     updateOrCreateCurrenciesInfo, 
     createCountryDataModel, 
     incrementCounter, 
     findPersistedCountryDataModel,
-    isDatabaseConnected,
-    getAllCountryDataStatRecords,
+    getCountryDataStatsRecords,
     getCurrenciesModel,
     getCounterCount
 }

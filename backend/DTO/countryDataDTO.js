@@ -5,7 +5,7 @@ export class CountryDataDTO {
     setNameInfo(nativeName, name){this.nameInfo = {nativeName, name}}
     setISOcode(ISOcode){this.ISOcode = ISOcode}
     setCurrencyInfo(rate, USDequivalence){
-        this.currencyInfo = {rate: rate, USDequivalence: USDequivalence}
+        this.currencyInfo = {rate: rate, USDequivalence: USDequivalence ? USDequivalence.toFixed(4) : undefined }
     }
     setLanguages(languages) {
         this.languages = ''
@@ -14,7 +14,7 @@ export class CountryDataDTO {
     setCurrentTimes(currentTimes){
         this.currentTimes = ''
         currentTimes.forEach(ct => this.currentTimes += 
-            ` ${ct.date.getHours()}:${ct.date.getMinutes()}:${ct.date.getSeconds()} (${ct.offset})`)
+            `${ct.date} (${ct.offset}) `)
     }
     setDistanceInfo(coordinates, argLtdLng){
         this.distanceInfo = {

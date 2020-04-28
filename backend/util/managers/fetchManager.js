@@ -30,7 +30,7 @@ async function fetchCountryData(countryCode3) {
         return r.json()
     } else {
         logger.error( `Failed while fetching country data for ${countryCode3}`)
-        throw Error(r.status, 'Ip does not belong to any country')
+        throw Error(r.status, 'La dirección ip ingresada no corresponde a ningún país')
     }
 }
 
@@ -41,10 +41,9 @@ async function fetchIpData(ip) {
     if (r.status === 200) {
         logger.info(`Succesfully fetched ip data for ${ip}`)
         return r.json()
-    }
-    else {
+    } else {
         logger.error( `Failed while fetching ip data for ${ip}`)
-        throw Error(r.status, 'Bad ip request')
+        throw Error(r.status, 'Dirección ip inválida')
     }
 }
 

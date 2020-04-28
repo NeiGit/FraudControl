@@ -1,9 +1,9 @@
 export class CountryDataStatsDTO {
     constructor() {
-        this.stats = []
+        this.countryStats = []
     }
     addCountryDataStat(countryDataStat, requestCount) {
-        this.stats.push({
+        this.countryStats.push({
             countryName: countryDataStat.name.native,
             distance: countryDataStat.coordinates.distanceToBsAs,
             requestCount: requestCount

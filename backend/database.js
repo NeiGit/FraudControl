@@ -4,8 +4,6 @@ import {Logger} from './util/services/logger.js'
 
 const logger = new Logger('database.js')
 
-
-
 async function init() {
     dotenv.config()
     const uri = process.env.ATLAS_URI

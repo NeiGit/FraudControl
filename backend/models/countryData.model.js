@@ -1,6 +1,6 @@
 import mongoose from 'mongoose'
 import UpdateIfCurrentPlugin from 'mongoose-update-if-current';
-import timestamps from 'mongoose-timestamp'
+//import timestamps from 'mongoose-timestamp'
 
 const Schema = mongoose.Schema
 

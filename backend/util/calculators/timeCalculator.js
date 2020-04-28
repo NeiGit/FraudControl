@@ -14,4 +14,11 @@ const SECOND_MILISECONDS = 1000
 const MINUTE_MILISECONDS = SECOND_MILISECONDS * 60
 const ARG_HOUR_OFFSET = 3
 
-export default {minutes, seconds, getCurrentUTCHours}
+function toTimeOnly(date) {
+    const h = (date.getHours()<10?'0':'') + date.getHours()
+    const m = (date.getMinutes()<10?'0':'') + date.getMinutes();
+    const s = (date.getSeconds()<10?'0':'') + date.getSeconds();
+    return h + ':' + m + ':' + s;
+  }
+
+export default {minutes, seconds, getCurrentUTCHours, toTimeOnly}

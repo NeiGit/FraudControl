@@ -1,7 +1,8 @@
 function convertToRadians(degrees) {
     return degrees * Math.PI / 180;
   }
-  
+
+// Haversine formula: calculate distance between two points on a sphere, in this case the Earth
 function calculateDistanceBetweenCoordinates(ltd1, lng1, ltd2, lng2) {
     const EARTH_RADIUS = 6371; // km
 
