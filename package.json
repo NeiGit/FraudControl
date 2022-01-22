@@ -20,7 +20,7 @@
     "mongoose-timestamp": "^0.6.0",
     "mongoose-update-if-current": "^1.4.0",
     "morgan": "^1.10.0",
-    "node-fetch": "^2.6.0"
+    "node-fetch": "^3.1.1"
   },
   "devDependencies": {
     "nodemon": "^2.0.3"
